@@ -13,4 +13,7 @@ Mnn_Core/__pycache__/
 *.bin
 *.gif
 *.mp4
-
+*.txt
+*.pgm
+*.stats
+apps/mnist/ann_model.py

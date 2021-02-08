@@ -37,6 +37,7 @@ def mexi_hat(input_size, k = 0.3):
     #w += torch.randn(w.shape)*0.5
     return w
 
+
 class MomentLayerRecurrent(torch.nn.Module):
     def __init__(self, input_size, output_size):
         super(MomentLayerRecurrent, self).__init__()
