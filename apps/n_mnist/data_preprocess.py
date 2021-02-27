@@ -225,7 +225,7 @@ class Training_Model:
         self.EPOCHS = 9
         self.BATCH = 256
         self.lr = 1e-2
-        self.log_interval = 10
+        self.log_interval = 20
         self.seed = 1024
         self.train_loader = None
         self.test_loader = None
@@ -243,9 +243,8 @@ class Training_Model:
         self.test_loader = torch.utils.data.DataLoader(dataset=nmistDataset(self.path, mode="test", frames=self.fps),
                                                        batch_size=self.BATCH, shuffle=True, num_workers=4)
 
-    def train_process(self, model, data_loader, criterion, epochs, model_name):
+    def train_process(self, model, data_loader, criterion, epochs, model_name, optimizer):
         model.train()
-        optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
         for epoch in range(epochs):
             for batch_idx, (mean, std, rho, target) in enumerate(data_loader):
                 optimizer.zero_grad()
@@ -260,7 +259,6 @@ class Training_Model:
                     train_info = '\nTrain Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                         epoch, batch_idx * len(mean), len(self.train_loader.dataset),
                                100 * batch_idx / len(self.train_loader), loss.item())
-                    print(train_info)
                     with open("log_{:}.txt".format(model_name[0:-3]), "a+", encoding="utf-8") as f:
                         f.write(train_info)
         return model
@@ -280,12 +278,12 @@ class Training_Model:
             f.write("Net: {:}, hidden: {}, ln1_std:{}, ln2_bias{}, ln2_std:{}, loss_mode:{:}\n".format(
                 save_name[0:-3], hidden, ln1_std, ln2_bias, ln2_std, self.loss_mode))
         best = 0
+        optimizer = torch.optim.Adam(net.parameters(), lr=self.lr)
         for epoch in range(self.EPOCHS):
-            if epoch >= int(self.EPOCHS / 2):
-                self.lr = 1e-3
-            net = self.train_process(net, self.train_loader, criterion, 1, save_name)
-            correct = self.test_process(net, self.test_loader, best)
+            net = self.train_process(net, self.train_loader, criterion, 1, save_name, optimizer)
+            correct = self.test_process(net, self.test_loader, save_name)
             if correct > best:
+                best = correct
                 torch.save(net.state_dict(), save_name)
 
     def load_model(self, model_name):
@@ -298,9 +296,10 @@ class Training_Model:
         net.load_state_dict(state)
         return net
 
-    def test_process(self, net, data_loader, correct=0):
+    def test_process(self, net, data_loader, model_name: str) -> int:
         net.eval()
         test_loss = 0
+        correct: int = 0
         with torch.no_grad():
             for mean, std, rho, target in data_loader:
                 out1, out2, out3 = net(mean, std, rho)
@@ -313,9 +312,10 @@ class Training_Model:
                     pred = pred.data.max(1, keepdim=True)[1]
                 correct += torch.sum(pred.eq(target.data.view_as(pred)))
         test_loss /= len(data_loader.dataset)
-        print('\nModel: {:},  Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            str(type(net)), test_loss, correct, len(data_loader.dataset),
-            100. * correct / len(data_loader.dataset)))
+        test_info = '\nTest set, Model: {:},  Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            str(model_name), test_loss, correct, len(data_loader.dataset), 100. * correct / len(data_loader.dataset))
+        with open("log_{:}.txt".format(model_name[0:-3]), "a+", encoding="utf-8") as f:
+            f.write(test_info)
         return correct
 
     def testing(self, model_name="nmnist_mlp_1000fps_v1.pt", mode="test"):
@@ -350,22 +350,17 @@ class Training_Model:
         print('\nModel: {:}, {:} set,  Accuracy: {}/{} ({:.0f}%)\n'.format(
             model_name[0:-3], "Test", correct, len(dataset), 100. * correct / len(dataset)))
 
-    def continue_training(self, model_name="mode_v2.pt", frames=500):
+    def continue_training(self, model_name="mode_v2.pt"):
         net = self.load_model(model_name)
-        train_loader = torch.utils.data.DataLoader(dataset=nmistDataset(datasetPath=self.path, mode="train",
-                                                                        frames=frames),
-                                                   batch_size=self.BATCH, shuffle=True, num_workers=4)
-        test_loader = torch.utils.data.DataLoader(dataset=nmistDataset(datasetPath=self.path, mode="test",
-                                                                        frames=frames),
-                                                   batch_size=self.BATCH, shuffle=True, num_workers=4)
+        optimizer = torch.optim.AdamW(net.parameters(), lr=self.lr)
         criterion = torch.nn.CrossEntropyLoss()
         best = 0
         save_name = "CL_" + model_name
         with open("log_{:}.txt".format(model_name[0:-3]), "a+", encoding="utf-8") as f:
             f.write("------N-MNIST MNN  Continue TRAINING START--------\n")
         for _ in range(self.EPOCHS):
-            net = self.train_process(net, train_loader, criterion, 1, model_name)
-            accuracy = self.test_process(net, test_loader)
+            net = self.train_process(net, self.train_loader, criterion, 1, model_name, optimizer)
+            accuracy = self.test_process(net, self.test_loader, model_name)
             if accuracy > best:
                 best = accuracy
                 torch.save(net.state_dict(), save_name)
@@ -373,19 +368,16 @@ class Training_Model:
 
 if __name__ == "__main__":
     tool = Training_Model()
-    tool.EPOCHS = 9
+    tool.EPOCHS = 15
     tool.loss_mode = 0
-    tool.net_params = (1000, True, True, False)
+    tool.fps = 500
+    tool.lr = 1e-3
+    tool.BATCH = 128
+    tool.fetch_dataset()
+    tool.net_params = (900, True, True, False)
     tool.path = "./data/n_mnist/"
-    tool.training("fps500.pt")
+    tool.continue_training("fps500.pt")
 
-    tool.fps = 250
-    tool.fetch_dataset()
-    tool.training("fps250.pt")
-
-    tool.fps = 850
-    tool.fetch_dataset()
-    tool.training("fps850.pt")
     """
     tool.net_params = (800, True, True, False)
     data = nmistDataset(datasetPath="./data/n_mnist/", mode="test", frames=500)

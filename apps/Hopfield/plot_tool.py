@@ -76,19 +76,18 @@ def compare_inp_and_out(inp_u: Tensor, inp_s: Tensor, inp_r: Tensor,
 
 if __name__ == "__main__":
     net = Net(16, 16, 50, 10, True)
-    state = torch.load("hopfield_demo.pt")
+    state = torch.load("hopfield.pt")
     net.load_state_dict(state)
     net.eval()
     path = "BioID_0010.pgm"
-    tool = PrepareData(16)
-    pic = tool.read_img(path)
-    pic.show()
-    u, s, r, tu, ts, tr = tool.fetch_train_data(path, 1)
-
+    tool = Model_Training()
+    u, s, r, tu, ts, tr = tool.train_loader.dataset[1]
+    tu = u.unsqueeze(0)
+    ts = s.unsqueeze(0)
+    tr = r.unsqueeze(0)
     with torch.no_grad():
         ru, rs, rr = net(tu, ts, tr)
 
-    compare_inp_and_out(tu, ts, tr, ru[-1], rs[-1], rr[-1])
+    fig = compare_inp_and_out(tu, ts, tr, ru[-1], rs[-1], rr[-1])
     plt.show()
-
 

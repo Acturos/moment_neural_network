@@ -108,7 +108,7 @@ class Ann_Model_Training:
                 optimizer.zero_grad()
                 data = data.view(data.size(0), -1)
                 out = model(data)
-                loss = criterion(out, target)
+                loss = criterion(out, target) + self.var_norm(model, 0.1)
                 loss.backward()
                 optimizer.step()
                 if batch_idx % self.log_interval == 0:
@@ -222,8 +222,19 @@ class Ann_Model_Training:
         _ = self.test_process(net3, mode=mode)
         _ = self.test_process(net4, mode=mode)
 
+    @staticmethod
+    def var_norm(model: torch.nn.Module, norm_lambda: float) -> torch.Tensor:
+        var_reg = torch.tensor(0.)
+        for param in model.parameters():
+            var_reg += torch.var(param)
+        return norm_lambda * var_reg
+
 
 if __name__ == "__main__":
+    net = MLP_Sigmoid_Bn()
     tool = Ann_Model_Training()
-    tool.test_models()
-    tool.test_models(mode="Train")
+    tool.fetch_dataset()
+    optimizer = torch.optim.Adam(net.parameters())
+    criterion = torch.nn.CrossEntropyLoss()
+    net = tool.train_process(net, optimizer, criterion)
+    _ = tool.test_process(net)
