@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from Mnn_Core.mnn_modules import *
 import matplotlib.pyplot as plt
 
+from Mnn_Core.mnn_modules import *
 
-class Debug_Utils:
+
+class DebugUtils:
     @staticmethod
     def mnn_map_visualization(ubar=np.arange(-10, 10, 0.1), sbar=np.arange(0.0, 30, 0.1)):
         cmap = "rainbow"
@@ -144,3 +144,7 @@ class Debug_Utils:
         if save is not None:
             fig.savefig(save)
         plt.show()
+
+
+if __name__ == '__main__':
+    DebugUtils.mnn_map_visualization()

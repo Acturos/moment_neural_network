@@ -263,8 +263,8 @@ class Mnn_Linear_Module_without_Rho(torch.nn.Module):
     def forward(self, ubar: Tensor, sbar: Tensor):
         ubar, sbar = self.linear(ubar, sbar)
         ubar, sbar = self.bn(ubar, sbar)
-        u = Mnn_Activate_Mean(ubar, sbar)
-        s = Mnn_Activate_Std(ubar, sbar, u)
+        u = Mnn_Activate_Mean.apply(ubar, sbar)
+        s = Mnn_Activate_Std.apply(ubar, sbar, u)
         return u, s
 
 
@@ -387,5 +387,7 @@ class Mnn_Linear_Module_with_Rho(torch.nn.Module):
         corr_activated = Mnn_Activate_Corr.apply(rho, u, s, u_activated, s_activated)
 
         return u_activated, s_activated, corr_activated
+
+
 
 
