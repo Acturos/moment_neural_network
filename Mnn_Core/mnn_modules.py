@@ -3,6 +3,7 @@
 
 from Mnn_Core.mnn_pytorch import *
 import itertools
+from typing import Tuple
 
 
 # Modules that correlation not involved:
@@ -238,7 +239,7 @@ class Mnn_Summation_Layer_without_Rho(torch.nn.Module):
             bound = 1 / np.sqrt(fan_in)
             init.uniform_(self.ext_bias_std, 0, bound)
 
-    def forward(self, ubar: Tensor, sbar: Tensor):
+    def forward(self, ubar: Tensor, sbar: Tensor) -> Tuple[Tensor, Tensor]:
         assert ubar.size() == sbar.size()
         ubar = F.linear(ubar, self.weight, self.bias)
         if self.ext_bias_std is not None:
@@ -386,4 +387,5 @@ class Mnn_Linear_Module_with_Rho(torch.nn.Module):
         corr_activated = Mnn_Activate_Corr.apply(rho, u, s, u_activated, s_activated)
 
         return u_activated, s_activated, corr_activated
+
 
