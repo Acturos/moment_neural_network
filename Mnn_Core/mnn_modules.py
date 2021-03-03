@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright 2020 Zhu Zhichao, ISTBI, Fudan University China
 
-from Mnn_Core.mnn_pytorch import *
-import itertools
+from .mnn_pytorch import *
+from torch.nn.parameter import Parameter
+import torch.nn.functional as F
+from torch.nn import init
 from typing import Tuple
+import itertools
 
 
 # Modules that correlation not involved:
@@ -387,7 +390,5 @@ class Mnn_Linear_Module_with_Rho(torch.nn.Module):
         corr_activated = Mnn_Activate_Corr.apply(rho, u, s, u_activated, s_activated)
 
         return u_activated, s_activated, corr_activated
-
-
 
 

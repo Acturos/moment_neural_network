@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from ..mnn_modules import *
+import torch
+from torch import Tensor
+from torch.nn.parameter import Parameter
+from typing import Tuple
 
 
 class MnnTempBn1d(torch.nn.Module):
@@ -18,7 +21,7 @@ class MnnTempBn1d(torch.nn.Module):
 
     def forward(self, inp_u: Tensor, inp_s: Tensor, inp_r: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         if self.training:
-            var_u = torch.var(inp_u, dim=0, keepdim=True)
+            var_u = torch.var(inp_u, dim=0)
             self._update_running_var(var_u)
 
             weight = self.weight / torch.sqrt(var_u + self.eps)
@@ -31,6 +34,9 @@ class MnnTempBn1d(torch.nn.Module):
             out_s = inp_s * weight
 
         return out_u, out_s, inp_r
+
+
+
 
 
 

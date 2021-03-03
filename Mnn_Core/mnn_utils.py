@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from Mnn_Core import fast_dawson
+from . import fast_dawson
 import torch
 from torch import Tensor
+from typing import Tuple
 
 
 class Param_Container:
@@ -357,28 +358,28 @@ def get_cov_matrix(std_in: Tensor, corr_in: Tensor) -> Tensor:
     return cov_in
 
 
-def update_correlation(cov_out: Tensor, ext_std):
+def update_correlation(cov_out: Tensor, ext_std) -> Tuple[Tensor, Tensor]:
     if cov_out.dim() == 2:
         var_out = torch.diagonal(cov_out)
     else:
         var_out = torch.diagonal(cov_out, dim1=-2, dim2=-1)
-    # Assume the external stimuli is independent with input
+        # Assume the external stimuli is independent with input
     if ext_std is not None:
         ext_var = torch.pow(ext_std, 2)
         var_out += ext_var
     if var_out.dim() == 1:
         temp_var_out = var_out.view(1, -1)
         temp_var_out = torch.mm(temp_var_out, torch.transpose(temp_var_out, dim0=1, dim1=0))
-    # Assume every dimension of the external stimuli are mutually independent
+        # Assume every dimension of the external stimuli are mutually independent
         corr_out = torch.div(cov_out, torch.sqrt(temp_var_out))
         torch.diagonal(corr_out).data.fill_(1.0)
     else:
         temp_var_out = var_out.view(var_out.size()[0], 1, -1)
+        # todo: rewrite the backward func of the following op
         temp_var_out = torch.bmm(temp_var_out, torch.transpose(temp_var_out, dim0=-2, dim1=-1))
 
         corr_out = torch.div(cov_out, torch.sqrt(temp_var_out))
         torch.diagonal(corr_out, dim1=-2, dim2=-1).data.fill_(1.0)
     std_out = torch.sqrt(var_out)
     return std_out, corr_out
-
 

@@ -16,4 +16,5 @@ Mnn_Core/__pycache__/
 *.txt
 *.pgm
 *.stats
+temp_test.py
 apps/mnist/ann_model.py
