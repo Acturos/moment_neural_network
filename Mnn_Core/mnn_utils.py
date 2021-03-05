@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from . import fast_dawson
+import fast_dawson
 import torch
 from torch import Tensor
 from typing import Tuple
