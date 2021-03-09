@@ -261,3 +261,12 @@ class Chebyshev():
             indx = np.logical_and(x > xmin+ delta_x*i, x <= xmin+delta_x*(i+1))
             h_fitted[indx] = np.polynomial.chebyshev.chebval(x[indx], P[i,:])
         return h_fitted        
+
+
+if __name__ == '__main__':
+    import torch
+    test = Dawson1()
+    a = torch.from_numpy(test.coef.cheb_G_neg)
+    print(a)
+    a = a.type(torch.float32)
+    print(a)
