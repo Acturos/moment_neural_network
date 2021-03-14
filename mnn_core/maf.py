@@ -4,7 +4,7 @@
 # Copyright 2020 Yang Qi, ISTBI, Fudan University China
 import matplotlib.pyplot as plt
 
-from Mnn_Core.fast_dawson import *
+from mnn_core.fast_dawson import *
 
 
 class MomentActivation():

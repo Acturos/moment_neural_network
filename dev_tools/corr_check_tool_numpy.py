@@ -5,8 +5,8 @@ Gradcheck for corr map using a simple 2d example
 @author: dell
 """
 
-from Mnn_Core.maf import *
-from Mnn_Core.mnn_pytorch import *
+from mnn_core.maf import *
+from mnn_core.mnn_pytorch import *
 
 maf = MomentActivation()
 

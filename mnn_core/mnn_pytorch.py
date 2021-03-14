@@ -5,7 +5,7 @@ Created on Sat Oct  3 14:49:43 2020
 @author: zzc14
 """
 
-from Mnn_Core.mnn_utils import *
+from mnn_core.mnn_utils import *
 
 torch.set_default_tensor_type(torch.DoubleTensor)
 mnn_core_func = Mnn_Core_Func()

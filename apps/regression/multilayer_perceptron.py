@@ -1,5 +1,5 @@
-#from Mnn_Core.mnn_pytorch import *
-from Mnn_Core.mnn_pytorch import *
+#from mnn_core.mnn_pytorch import *
+from mnn_core.mnn_pytorch import *
 import numpy as np
 import torch
 import time

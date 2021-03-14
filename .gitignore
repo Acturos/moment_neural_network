@@ -1,7 +1,7 @@
 # Ignore everything in this directory
 *ipynb*/
 .virtual_documents/
-Mnn_Core/__pycache__/
+mnn_core/__pycache__/
 # Except this file
 !.gitignore
 *.pyc

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 
-from Mnn_Core.mnn_modules import *
+from mnn_core.mnn_modules import *
 
 
 class DebugUtils:

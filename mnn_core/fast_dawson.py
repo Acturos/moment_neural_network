@@ -72,7 +72,6 @@ class Dawson1:
 
     
 
-
 class Dawson2:
     def __init__(self, N=30):
         '''Provide 2nd order Dawson function and their integrals'''
@@ -264,9 +263,14 @@ class Chebyshev():
 
 
 if __name__ == '__main__':
-    import torch
-    test = Dawson1()
-    a = torch.from_numpy(test.coef.cheb_G_neg)
-    print(a)
-    a = a.type(torch.float32)
-    print(a)
+    import matplotlib.pyplot as plt
+    test = Dawson2()
+    x = np.linspace(-10, 3, 1000)
+    y1 = np.log(test.int_fast(x))
+    y2 = np.log(test.dawson2(x))
+    
+    fig = plt.figure()
+    plt.plot(x, y1)
+    plt.plot(x, y2)
+    plt.legend(['int_fast', 'dawson2'])
+    plt.show()

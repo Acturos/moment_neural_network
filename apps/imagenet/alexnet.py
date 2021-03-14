@@ -2,7 +2,7 @@
 import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
-from Mnn_Core.mnn_pytorch import *
+from mnn_core.mnn_pytorch import *
 from torch.utils.tensorboard import SummaryWriter
 
 import json

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2020 Zhu Zhichao, ISTBI, Fudan University China
 
-from Mnn_Core.mnn_pytorch import *
+from mnn_core.mnn_pytorch import *
 from torch.nn.parameter import Parameter
 import torch.nn.functional as F
 from torch.nn import init

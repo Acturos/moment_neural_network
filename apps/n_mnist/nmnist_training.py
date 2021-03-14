@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import pickle
-from Mnn_Core.mnn_modules import *
+from mnn_core.mnn_modules import *
 from typing import Tuple
 from torch.utils.data import DataLoader
 

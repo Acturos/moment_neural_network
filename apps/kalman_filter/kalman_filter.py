@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from Mnn_Core.mnn_modules import *
+from mnn_core.mnn_modules import *

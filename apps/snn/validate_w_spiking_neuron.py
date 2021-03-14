@@ -9,7 +9,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import time
-from Mnn_Core.maf import *
+from mnn_core.maf import *
 
 
 class InteNFire():

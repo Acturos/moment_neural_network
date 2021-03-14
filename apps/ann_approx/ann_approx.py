@@ -1,4 +1,4 @@
-from Mnn_Core.mnn_modules import *
+from mnn_core.mnn_modules import *
 
 
 class Net(torch.nn.Module):

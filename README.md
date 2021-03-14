@@ -29,8 +29,9 @@ You can use it to set, get and reset parameters easily with methods built in.
 
 # Implementation of Mnn activation fuction with pytorch  
 ## Usage
+
 ```python
-from Mnn_Core.mnn_pytorch import *
+from mnn_core.mnn_pytorch import *
 import torch
 # Never forget to set the default data type of torch as Double
 torch.set_default_tensor_type(torch.DoubleTensor)
@@ -85,8 +86,9 @@ Here we provide a solution based on asymptotic expansions of these integrals (g(
 The result is the reliable evaluation of these functions over arbitrary input values, and orders-of-magnitude speed improvement over brute force methods.
 
 Usage:
+
 ```Python
-from Mnn_Core.fast_dawson import *
+from mnn_core.fast_dawson import *
 
 ds1 = Dawson1()
 ds2 = Dawson2()

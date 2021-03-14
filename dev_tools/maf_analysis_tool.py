@@ -1,6 +1,6 @@
 import numpy as np
 
-from Mnn_Core.maf import *
+from mnn_core.maf import *
 
 
 def show_2d_grid_map(fun, xmin=0, xmax=1, ymin=0, ymax=1, log_scale=False):

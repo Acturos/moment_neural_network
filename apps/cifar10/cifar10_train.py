@@ -2,7 +2,7 @@
 import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
-from Mnn_Core.mnn_modules import *
+from mnn_core.mnn_modules import *
 from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter('runs/cifar10_experiment_1')
