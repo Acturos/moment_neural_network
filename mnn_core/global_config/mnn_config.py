@@ -22,33 +22,25 @@ path = __file__[:-13] + 'double_d1_cheb_G_neg.tensor'
 val = torch.load(path)
 set_value('double_d1_cheb_G_neg', value=val)
 
-path = __file__[:-13] + 'float_d1_cheb_G_neg.tensor'
+path = __file__[:-13] + 'double_d1_cheb_lg_neg.tensor'
 val = torch.load(path)
-set_value('float_d1_cheb_G_neg', value=val)
+set_value('double_d1_cheb_lg_neg', value=val)
+
 
 path = __file__[:-13] + 'double_d2_asym_neg_inf.tensor'
 val = torch.load(path)
 set_value('double_d2_asym_neg_inf', value=val)
 
-path = __file__[:-13] + 'float_d2_asym_neg_inf.tensor'
-val = torch.load(path)
-set_value('float_d2_asym_neg_inf', value=val)
 
 path = __file__[:-13] + 'double_d2_cheb_neg.tensor'
 val = torch.load(path)
 set_value('double_d2_cheb_neg', value=val)
 
-path = __file__[:-13] + 'float_d2_cheb_neg.tensor'
-val = torch.load(path)
-set_value('float_d2_cheb_neg', value=val)
 
 path = __file__[:-13] + 'double_d2_cheb_H_neg.tensor'
 val = torch.load(path)
 set_value('double_d2_cheb_H_neg', value=val)
 
-path = __file__[:-13] + 'float_d2_cheb_H_neg.tensor'
-val = torch.load(path)
-set_value('float_d2_cheb_H_neg', value=val)
 
 path = __file__[:-13] + 'double_d2_cheb_H_pos.tensor'
 val = torch.load(path)

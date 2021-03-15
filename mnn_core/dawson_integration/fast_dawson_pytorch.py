@@ -24,26 +24,28 @@ def chebyshev_val(x: Tensor, c: Tensor) -> Tensor:
         temp = c0
         c0 = c[-i] - c1
         c1 = temp + c1 * x2
-    x = c0 + c1 * x
-    return x
+
+    return c0 + c1 * x
 
 
 def chebyshev_val_neg(x: Tensor, c: Tensor, num_sub: int = 50, wrap: float = 4., alpha: int = 1) -> Tensor:
     delta_x = 1 / num_sub
-    x = wrap / (wrap + torch.abs_(x).pow_(alpha))
+    x = wrap / (wrap + torch.abs(x).pow(alpha))
+    y = torch.zeros_like(x)
     for i in range(num_sub):
         idx = torch.bitwise_and(x > delta_x * i, x <= delta_x * (i + 1))
-        x[idx] = chebyshev_val(x[idx], c[i, :])
-    return x
+        y[idx] = chebyshev_val(x[idx], c[i, :])
+    return y
 
 
 def chebyshev_val_no_transform(x: Tensor, c: Tensor, x_min: float = 0.,
                                x_max: float = 1., num_sub: int = 50) -> Tensor:
     delta_x = (x_max - x_min) / num_sub
+    y = torch.zeros_like(x)
     for i in range(num_sub):
         idx = torch.bitwise_and(torch.gt(x, x_min + delta_x * i), torch.le(x, x_min + delta_x * (i + 1)))
-        x[idx] = chebyshev_val(x[idx], c[i, :])
-    return x
+        y[idx] = chebyshev_val(x[idx], c[i, :])
+    return y
 
 
 class DawsonIntegrate(torch.nn.Module):
@@ -59,25 +61,27 @@ class DawsonIntegrate(torch.nn.Module):
     boundary: float
 
     def __init__(self, div: int = 4, deg: int = 8, cheb_xmin_for_G: float = -6.0, boundary: float = 9.,
-                 cheb_G_neg: Tensor = mnn_config.get_value('double_d1_cheb_G_neg')) -> None:
+                 cheb_G_neg: Tensor = mnn_config.get_value('double_d1_cheb_G_neg'),
+                 cheb_g_neg: Tensor = mnn_config.get_value('double_d1_cheb_lg_neg')) -> None:
         super(DawsonIntegrate, self).__init__()
         self.div = div
         self.deg = deg
         self.euler_gamma = np.euler_gamma
         self.cheb_xmin_for_G = cheb_xmin_for_G
         self.register_buffer('cheb_G_neg', cheb_G_neg)
+        self.register_buffer('cheb_g_neg', cheb_g_neg)
         self.boundary = boundary
         self.erfi = FaddeevaErfi(boundary=boundary)
 
     def _gpu_dawson(self, x: Tensor) -> Tensor:
         y = torch.zeros_like(x)
         region1 = torch.bitwise_or(torch.lt(x, self.cheb_xmin_for_G), torch.gt(x, - self.cheb_xmin_for_G))
-        y[region1] = self.asym_neg_inf(- x[region1].abs_())
+        y[region1] = self.asym_neg_inf(- torch.abs(x[region1]))
 
         region1.bitwise_not_()
-        y[region1] = chebyshev_val_neg(- x[region1].abs_(), self.cheb_G_neg, num_sub=self.div)
-        region1 = x > 0
-        y[region1] = math.sqrt(math.pi) * torch.exp(x[region1].pow_(2)) - y[region1]
+        y[region1] = chebyshev_val_neg(- torch.abs(x[region1]), self.cheb_g_neg, num_sub=self.div)
+        region1 = torch.gt(x, 0.)
+        y[region1] = math.sqrt(math.pi) * torch.exp(x[region1].pow(2)) - y[region1]
         return y
 
     @torch.jit.export
@@ -87,9 +91,9 @@ class DawsonIntegrate(torch.nn.Module):
                 return self._gpu_dawson(x)
             else:
                 device = x.device
-                return torch.from_numpy(scipy.erfcx(x.cpu().numpy()) * math.sqrt(math.pi) / 2).to(device=device)
+                return torch.from_numpy(scipy.erfcx(- x.cpu().numpy()) * math.sqrt(math.pi) / 2).to(device=device)
         else:
-            return torch.from_numpy(scipy.erfcx(x.numpy()) * math.sqrt(math.pi) / 2)
+            return torch.from_numpy(scipy.erfcx(- x.numpy()) * math.sqrt(math.pi) / 2)
 
     @staticmethod
     def asym_neg_inf(x: Tensor) -> Tensor:
@@ -112,7 +116,7 @@ class DawsonIntegrate(torch.nn.Module):
         return temp
 
     def forward(self, x: Tensor) -> Tensor:
-        pos_idx = x > 0
+        pos_idx = torch.gt(x, 0.)
         if x.is_cuda:
             if x.numel() < mnn_config.get_value('cpu_or_gpu'):
                 device = x.device
@@ -123,7 +127,7 @@ class DawsonIntegrate(torch.nn.Module):
             temp = torch.from_numpy(math.pi / 2 * scipy.erfi(x[pos_idx].numpy()))
 
         idx = torch.bitwise_or(torch.lt(x, self.cheb_xmin_for_G), torch.gt(x, - self.cheb_xmin_for_G))
-        x[idx] = self.integrate_asym_neg_inf(-torch.abs_(x[idx]))
+        x[idx] = self.integrate_asym_neg_inf(-torch.abs(x[idx]))
         idx.bitwise_not_()
         x[idx] = chebyshev_val_no_transform(-torch.abs_(x[idx]), self.cheb_G_neg, x_min=self.cheb_xmin_for_G,
                                             x_max=0., num_sub=self.div)
@@ -215,7 +219,7 @@ class DoubleDawsonIntegrate(torch.nn.Module):
 
     def func_int_asym_pos_inf(self, x: Tensor) -> Tensor:
         if x.is_cuda:
-            if x.numel > mnn_config.get_value('cpu_or_gpu'):
+            if x.numel() > mnn_config.get_value('cpu_or_gpu'):
                 e1 = self.dawson1.erfi(x)
             else:
                 device = x.device
